@@ -21,9 +21,7 @@ class DeepLoggingAssert:
         )
         parent_node.wait('exists', timeout=CONTROL_TIMEOUT)
 
-        # 展开父节点
-        # parent_node.expand()
-        # time.sleep(WAIT_SHORT)
+
 
         # 定位并断言子节点存在
         child_node = parent_node.child_window(

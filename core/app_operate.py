@@ -16,7 +16,8 @@ class DeepLoggingOperate:
 
     def get_main_window(self):
         """获取主窗口对象"""
-        main_window = self.app.window(title_re=WINDOW_TITLE_PATTERN)
+        #main_window = self.app.window(title_re=WINDOW_TITLE_PATTERN)
+        main_window = self.app.window(class_name="WindowsForms10.Window.8.app.0.2dac507_r6_ad1",title_re=WINDOW_TITLE_PATTERN)
         main_window.wait("ready", timeout=LAUNCH_TIMEOUT)
         return main_window
 
@@ -45,7 +46,7 @@ class DeepLoggingOperate:
         target_control.click_input()
         return self
 
-    def input_text_to_edit(self, control_type="Edit", name="", input_text="", timeout=CONTROL_TIMEOUT):
+    def input_text_to_edit(self, control_type="Edit", name="", input_text="", timeout=8):
         """
         通用输入框录入方法
         :param control_type: 输入框控件类型（默认Edit，UIA后端常用）

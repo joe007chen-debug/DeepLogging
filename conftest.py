@@ -20,10 +20,9 @@ def print_all_windows():
 # 新增：通过窗口标题查找已有程序的句柄
 def get_existing_app_handle():
     """查找已打开的DeepLogging程序窗口句柄"""
-    print_all_windows()
     try:
         # 按窗口标题模糊匹配（替换为你的程序实际标题特征）
-        handle = find_window(title_re=WINDOW_TITLE_PATTERN)
+        handle = find_window(class_name="WindowsForms10.Window.8.app.0.2dac507_r6_ad1",title_re=WINDOW_TITLE_PATTERN)
         return handle
     except:
         raise RuntimeError(f"未找到已打开的程序窗口（匹配规则：{WINDOW_TITLE_PATTERN}）")

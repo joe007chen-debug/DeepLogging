@@ -10,4 +10,4 @@ WAIT_SHORT = 0.5      # 短等待（秒）
 WAIT_LONG = 2         # 长等待（秒）
 
 # 窗口匹配规则（按实际窗口标题调整）
-WINDOW_TITLE_PATTERN = r"DeepLogging \[.*\.dlp\]"
+WINDOW_TITLE_PATTERN =r"DeepLogging"    #r"DeepLogging \[.*\.dlp\]"  r"DeepLogging AI"
