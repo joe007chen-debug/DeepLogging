@@ -4,6 +4,7 @@ import time
 from pywinauto import Application
 from config.config import *
 from core.app_assert import DeepLoggingAssert
+from pywinauto.keyboard import send_keys
 
 
 class DeepLoggingOperate:
@@ -75,10 +76,10 @@ class DeepLoggingOperate:
         time.sleep(WAIT_SHORT)  # 等待焦点激活
 
         # 4. 清空原有内容（通用方案：全选+删除）
-        edit_control.type_keys('^a')  # Ctrl+A 全选
-        time.sleep(WAIT_SHORT)
-        edit_control.type_keys('{DELETE}')  # 删除选中内容
-        time.sleep(WAIT_SHORT)
+        # edit_control.type_keys('^a')  # Ctrl+A 全选
+        # time.sleep(WAIT_SHORT)
+        # edit_control.type_keys('{DELETE}')  # 删除选中内容
+        # time.sleep(WAIT_SHORT)
 
         # 5. 输入目标文本（支持特殊字符，如换行、空格等）
         edit_control.type_keys(input_text, with_spaces=True, with_newlines=True)
@@ -91,6 +92,43 @@ class DeepLoggingOperate:
         print(f"✅ 输入框[{name}]录入成功，内容：{input_text}")
         return self  # 链式调用，如 app_operate.click_control(...).input_text_to_edit(...)
 
+    def input_text_to_edit_sendkeys(self, control_type="Edit", name="", input_text="", timeout=8):
+        """
+        通用输入框录入方法
+        :param control_type: 输入框控件类型（默认Edit，UIA后端常用）
+        :param name: 输入框的title/name属性（定位标识）
+        :param input_text: 要录入的文本
+        :param timeout: 控件加载超时时间
+        :return: self（支持链式调用）
+        """
+        # 1. 定位输入框控件
+        edit_control = self.main_window.child_window(
+            control_type=control_type,
+            title=name  # 按输入框的name/title定位，也可改用automation_id
+        )
+
+        # 2. 前置验证：确保输入框存在、可见、可编辑
+        try:
+            edit_control.wait('visible', timeout=timeout)
+            assert edit_control.exists(), f"输入框[{name}]不存在"
+            assert edit_control.is_visible(), f"输入框[{name}]不可见"
+            assert edit_control.is_enabled(), f"输入框[{name}]不可编辑"
+        except Exception as e:
+            raise RuntimeError(f"输入框[{name}]验证失败：{str(e)}")
+
+        # 3. 激活输入框（确保焦点在输入框）
+        edit_control.click_input()
+        time.sleep(WAIT_SHORT)  # 等待焦点激活
+
+        # 5. 输入目标文本（支持特殊字符，如换行、空格等）
+        send_keys(input_text, pause=0.1)
+        send_keys('{ENTER}', pause=0.2)
+        send_keys('{ENTER}', pause=0.2)
+        time.sleep(WAIT_SHORT)
+
+
+        print(f"✅ 输入框[{name}]录入成功，内容：{input_text}")
+        return self  # 链式调用，如 app_operate.click_control(...).input_text_to_edit(...)
     def is_process_running(self):
         """验证程序进程是否运行"""
         return self.app.is_process_running()

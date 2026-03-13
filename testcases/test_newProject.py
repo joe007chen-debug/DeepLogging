@@ -7,7 +7,7 @@ from pywinauto.mouse import click
 from core import app_assert
 
 
-def test_module1_click_target_button(app_operate):
+def test_createproject(app_operate):
     #1. 确保主窗口激活（可选，防止程序在后台）
     app_operate.main_window.set_focus()
     time.sleep(WAIT_SHORT)
