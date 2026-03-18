@@ -48,4 +48,3 @@ def test_createproject(app_operate):
 
     app_operate.assertor.assert_tree_node_exists("Demo","data_test.xtf")
 
-    print("✅ 模块1-用例3：目标控件点击验证通过")
