@@ -13,10 +13,10 @@ def test_createDataset(app_operate):
 
     # 目前程序有bug，先进行注释
     #点击Demo按钮
-    # app_operate.click_control(
-    #     control_type="TreeItem",
-    #     name="Demo"
-    # )
+    app_operate.click_control(
+        control_type="TreeItem",
+        name="Demo"
+    )
     # 点击Create DataSet，还有待优化，目前是坐标定位
     click(coords=(190, 203))
     #点击创建数据集按钮

@@ -1,13 +1,17 @@
 # core/app_operate.py
 import os
 import time
+import io
+
 
 import pyautogui
 from pywinauto import Application
 from config.config import *
 from core.app_assert import DeepLoggingAssert
 from pywinauto.keyboard import send_keys
-
+from PIL import Image
+from skimage.metrics import structural_similarity as ssim
+import numpy as np
 
 class DeepLoggingOperate:
     """DeepLogging程序操作封装类"""
@@ -207,17 +211,46 @@ class DeepLoggingOperate:
 
     """用于识别不出来特征的控件，用pyautogui识别图片找到坐标点击"""
     @staticmethod
-    def click_coordinate(img_name,confidence=0.8,duration=0.3):
+    def click_coordinate(img_name,confidence=0.8,duration=0.3,movex=0,movey=0):
         # current_dir = os.path.dirname(os.path.abspath(__file__))
         base_dir = os.getcwd()
-        img_path = os.path.join(base_dir,"testcases", "imgs",img_name)
+        img_path = os.path.join(base_dir,"testcases", "imgs","input",img_name)
         try:
             icon_pos = pyautogui.locateOnScreen(img_path, confidence=0.8)
             if icon_pos:
                 center_x, center_y = pyautogui.center(icon_pos)
-                pyautogui.moveTo(center_x, center_y, duration=0.3)
+                pyautogui.moveTo(center_x+movex, center_y+movey, duration=0.3)
                 pyautogui.click()
             else:
                 print("定位失败，请尝试调低confidence")
         except Exception as e:
             print("发生异常:", e)
+
+    @staticmethod
+    def assert_image_match(region, img_name, threshold=0.85):
+        # 1. 截图
+        screenshot = pyautogui.screenshot(region=region)
+
+        # 2. 读取基准图
+        base_dir = os.getcwd()
+        img_path = os.path.join(base_dir, "testcases", "imgs", "assert", img_name)
+        baseline = Image.open(img_path)
+
+        # ====================== 修复核心：统一尺寸 + 统一通道 ======================
+        # 把截图缩放到和基准图一样大小
+        screenshot = screenshot.resize(baseline.size, Image.Resampling.LANCZOS)
+
+        # 统一转成 RGB（去掉透明通道）
+        screenshot_rgb = screenshot.convert("RGB")
+        baseline_rgb = baseline.convert("RGB")
+
+        # 转数组
+        img1 = np.array(screenshot_rgb)
+        img2 = np.array(baseline_rgb)
+
+        # 3. 计算相似度
+        ssim_score = ssim(img1, img2, channel_axis=2)
+
+        # 4. 断言
+        assert ssim_score >= threshold, f"图片相似度不足：{ssim_score:.2f} < {threshold}"
+        print(f"✅ 图片断言成功！相似度 = {ssim_score:.2f}")

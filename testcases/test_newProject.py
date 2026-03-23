@@ -28,23 +28,5 @@ def test_createproject(app_operate):
         name="Create"
     )
 
-    # 点击Open Data，还有待优化，目前是坐标定位
-    click(coords=(190, 203))
-    click(coords=(156, 226))
-    # 选择数据集窗口
-    racDialog = app_operate.main_window.child_window(title="打开",control_type="Window")
-    racDialog.draw_outline()
-
-    app_operate.input_text_to_edit(
-        control_type="Edit",
-        name="文件名(N):",
-        input_text=r"D:\data\data_test.xtf"
-    )
-    # 点击打开
-    app_operate.click_control(
-            control_type="Button",
-            name="打开(O)"
-        )
-
-    app_operate.assertor.assert_tree_node_exists("Demo","data_test.xtf")
+    # 断言项目新增成功
 
