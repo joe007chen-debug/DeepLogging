@@ -2,9 +2,9 @@ import pprint
 import time
 
 import pyautogui
+from _pytest import unittest
 from pywinauto.mouse import click
-from config.config import WAIT_SHORT
-from utils.InputMethod import InputMethod
+from config.config import WAIT_SHORT, WAIT_LONG
 
 
 def test_initdata(app_operate):
@@ -29,7 +29,11 @@ def test_initdata(app_operate):
     # 断言加载成功
     app_operate.assertor.assert_tree_node_exists("Demo", "GR.las")
 
+
+
+
 def test_addDepthLog(app_operate):
+
     # 激活主窗口
     app_operate.main_window.set_focus()
 
@@ -80,12 +84,12 @@ def test_addDepthLog(app_operate):
                                          control_type="MenuItem",
                                          name="Basic"
                                          )
-    time.sleep(WAIT_SHORT)
+    time.sleep(WAIT_LONG)
 
     # 点击Curve
     app_operate.click_coordinate(img_name="curve.png")
 
-    time.sleep(WAIT_SHORT)
+    time.sleep(WAIT_LONG)
 
     # 点击测井图T1道
     app_operate.click_coordinate(img_name="curveT1.png")
@@ -107,10 +111,12 @@ def test_addDepthLog(app_operate):
     #                                           input_text="ds:F1;ch:GR"
     #                                      )
 
+    time.sleep(WAIT_LONG)
+
     # 改成坐标输入
     app_operate.click_coordinate(img_name="dataname.png")
-    time.sleep(WAIT_SHORT)
-    pyautogui.press('shift')
+    time.sleep(WAIT_LONG)
+    #pyautogui.press('shift')
     pyautogui.hotkey('ctrl', 'a')
     pyautogui.press('backspace')
     pyautogui.typewrite("ds:F1;ch:GR")
@@ -148,3 +154,4 @@ def test_addDepthLog(app_operate):
 
     #断言图像生成
     app_operate.assert_image_match(img_name="depthlog.png",region=(530,201,162,602))
+

@@ -2,7 +2,7 @@
 import os
 import time
 import io
-
+from datetime import datetime
 
 import pyautogui
 from pywinauto import Application
@@ -215,11 +215,12 @@ class DeepLoggingOperate:
         # current_dir = os.path.dirname(os.path.abspath(__file__))
         base_dir = os.getcwd()
         img_path = os.path.join(base_dir,"testcases", "imgs","input",img_name)
+        print("img_path",img_path)
         try:
-            icon_pos = pyautogui.locateOnScreen(img_path, confidence=0.8)
+            icon_pos = pyautogui.locateOnScreen(img_path, confidence=confidence)
             if icon_pos:
                 center_x, center_y = pyautogui.center(icon_pos)
-                pyautogui.moveTo(center_x+movex, center_y+movey, duration=0.3)
+                pyautogui.moveTo(center_x+movex, center_y+movey, duration=duration)
                 pyautogui.click()
             else:
                 print("定位失败，请尝试调低confidence")
@@ -228,6 +229,7 @@ class DeepLoggingOperate:
 
     @staticmethod
     def assert_image_match(region, img_name, threshold=0.85):
+        # region定义(左上角x, 左上角y, 宽度width, 高度height)
         # 1. 截图
         screenshot = pyautogui.screenshot(region=region)
 
@@ -250,6 +252,16 @@ class DeepLoggingOperate:
 
         # 3. 计算相似度
         ssim_score = ssim(img1, img2, channel_axis=2)
+
+        # ====================== 新增：保存截图文件，方便对比效果 ======================
+        # 生成保存路径：在assert目录下新建snapshots子文件夹，按时间戳命名
+        snapshot_dir = os.path.join(base_dir, "testcases", "imgs", "assert", "snapshots")
+        os.makedirs(snapshot_dir, exist_ok=True)  # 自动创建目录，不存在则新建
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # 精确到毫秒
+        save_name = f"{os.path.splitext(img_name)[0]}_snap_{timestamp}.png"
+        save_path = os.path.join(snapshot_dir, save_name)
+        screenshot_rgb.save(save_path)  # 保存处理后的截图
+        print(f"📸 截图已保存至：{save_path}")
 
         # 4. 断言
         assert ssim_score >= threshold, f"图片相似度不足：{ssim_score:.2f} < {threshold}"
