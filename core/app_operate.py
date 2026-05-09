@@ -39,17 +39,17 @@ class DeepLoggingOperate:
         return self
 
     """主窗口点击"""
-    def click_control(self, control_type, name, timeout=CONTROL_TIMEOUT):
+    def click_control(self, control_type, name, timeout=CONTROL_TIMEOUT,parent=None,found_index=0 ):
         """通用控件点击方法（适配所有模块的控件点击）"""
         target_control = self.main_window.child_window(
             control_type=control_type,
-            title=name
+            title=name,
+            found_index=found_index
         )
         # 前置验证
         assert target_control.exists(timeout=timeout), f"控件[{name}]不存在"
         assert target_control.is_visible(), f"控件[{name}]不可见"
         assert target_control.is_enabled(), f"控件[{name}]不可点击"
-
         # 执行点击
         target_control.click_input()
         return self
@@ -103,7 +103,7 @@ class DeepLoggingOperate:
 
 
     """针对不适合type_keys方式录入数据的，采用send_keys方式录入"""
-    def input_text_to_edit_sendkeys(self, control_type="Edit", name="", input_text="", timeout=8):
+    def input_text_to_edit_sendkeys(self, control_type="Edit", name="", input_text="", timeout=8,is_needenter=0):
         """
         通用输入框录入方法
         :param control_type: 输入框控件类型（默认Edit，UIA后端常用）
@@ -133,8 +133,9 @@ class DeepLoggingOperate:
 
         # 5. 输入目标文本（支持特殊字符，如换行、空格等）
         send_keys(input_text, pause=0.1)
-        send_keys('{ENTER}', pause=0.2)
-        send_keys('{ENTER}', pause=0.2)
+        if is_needenter:
+            send_keys('{ENTER}', pause=0.2)
+            send_keys('{ENTER}', pause=0.2)
         time.sleep(WAIT_SHORT)
 
 
@@ -266,3 +267,39 @@ class DeepLoggingOperate:
         # 4. 断言
         assert ssim_score >= threshold, f"图片相似度不足：{ssim_score:.2f} < {threshold}"
         print(f"✅ 图片断言成功！相似度 = {ssim_score:.2f}")
+
+    def get_control(self, control_type, name=None, found_index=0, timeout=CONTROL_TIMEOUT):
+        """
+        全局搜索控件（无视层级），完全兼容 UIAWrapper
+        """
+        # 用 descendants 找所有层级控件
+        if name:
+            controls = self.main_window.descendants(control_type=control_type, title=name)
+        else:
+            controls = self.main_window.descendants(control_type=control_type)
+
+        if not controls:
+            raise RuntimeError(f"未找到控件：control_type={control_type}, name={name}")
+
+        # 处理多个同名控件
+        if len(controls) > 1:
+            print(f"⚠️  找到 {len(controls)} 个匹配控件，使用索引 {found_index}")
+            if found_index >= len(controls):
+                raise IndexError(f"索引 {found_index} 超出控件数量（共 {len(controls)} 个）")
+
+        target_control = controls[found_index]
+
+        # 等待控件可见（兼容 UIAWrapper，不调用 exists/wait）
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            try:
+                # 直接尝试获取控件的可见性，不依赖 exists()
+                if target_control.is_visible():
+                    break
+            except:
+                pass
+            time.sleep(0.1)
+        else:
+            raise RuntimeError(f"控件[{name}]超时未加载完成或不可见")
+
+        return target_control
